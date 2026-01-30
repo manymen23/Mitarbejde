@@ -1,12 +1,23 @@
-{
-  "name": "mitarbejde-api",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module"
-"dependencies": {
-  "formidable": "^2.1.1",
-  "openai": "^4.28.0"
-}
+
   "pdf-parse": "^1.1.1",
   "mammoth": "^1.4.2"
+}{
+  "name": "mitarbejde",
+  "version": "1.0.0",
+  "type": "module"
+  "description": "App til kontraktanalyse",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "formidable": "^2.1.1",
+    "openai": "^4.28.0",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.4.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
 }
+
