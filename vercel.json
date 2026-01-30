@@ -1,20 +1,13 @@
 {
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-{
   "version": 2,
   "builds": [
     { "src": "api/kontrakt.js", "use": "@vercel/node" },
     { "src": "api/timer.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/kontrakt", "dest": "/api/kontrakt.js" },
-    { "src": "/api/timer", "dest": "/api/timer.js" }
-  ],
-  "env": {
-    "OPENAI_API_KEY": "din_openai_key_her"
-  }
+    { "src": "/api/kontrakt", "dest": "api/kontrakt.js" },
+    { "src": "/api/timer", "dest": "api/timer.js" }
+  ]
 }
+
 
