@@ -1,17 +1,17 @@
-/api/calculate.js
 export default function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Kun POST tilladt" })
+    res.status(405).json({ error: "Kun POST tilladt" })
+    return
   }
 
-  const {
-    timer = 0,
-    timeløn = 0,
-    tillæg = 0,
-    skatProcent = 0,
-    amBidragProcent = 0,
-    ferieProcent = 0
-  } = req.body
+  const body = req.body || {}
+
+  const timer = body.timer || 0
+  const timeløn = body.timeløn || 0
+  const tillæg = body.tillæg || 0
+  const skatProcent = body.skatProcent || 0
+  const amBidragProcent = body.amBidragProcent || 0
+  const ferieProcent = body.ferieProcent || 0
 
   const brutto = timer * timeløn + tillæg
   const amBidrag = brutto * (amBidragProcent / 100)
@@ -19,5 +19,11 @@ export default function handler(req, res) {
   const feriepenge = brutto * (ferieProcent / 100)
   const udbetaling = brutto - amBidrag - skat
 
-  res.json({ brutto, amBidrag, skat, feriepenge, udbetaling })
+  res.status(200).json({
+    brutto,
+    amBidrag,
+    skat,
+    feriepenge,
+    udbetaling
+  })
 }
