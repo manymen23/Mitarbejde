@@ -1,7 +1,6 @@
 
   "pdf-parse": "^1.1.1",
   "mammoth": "^1.4.2"
-}
   "name": "mitarbejde",
   "version": "1.0.0",
   "type": "module"
