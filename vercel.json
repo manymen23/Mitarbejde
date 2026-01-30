@@ -5,16 +5,6 @@
       "dest": "/api/$1"
     }
   ],
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
-}
-{
-  "functions": {
-    "api/kontrakt.js": {
-      "runtime": "nodejs18.x"
     }
   }
 }
