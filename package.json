@@ -1,10 +1,4 @@
-  "name": "mitarbejde",
-  "version": "1.0.0",
-  "type": "module"
-  "description": "App til kontraktanalyse",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+
 {
   "name": "mitarbejde",
   "version": "1.0.0",
