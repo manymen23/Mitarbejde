@@ -3,3 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module"
+"dependencies": {
+  "formidable": "^2.1.1",
+  "openai": "^4.28.0"
+}
