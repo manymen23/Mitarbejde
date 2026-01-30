@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "module"
-}
-
 // fil: /api/kontrakt.js
 import formidable from "formidable";
 import fs from "fs";
