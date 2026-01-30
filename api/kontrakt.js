@@ -1,82 +1,51 @@
-import formidable from "formidable";
-import fs from "fs";
-import OpenAI from "openai";
+const formidable = require('formidable');
+const fs = require('fs');
+const OpenAI = require('openai');
 
-export const config = {
-  api: {
-    bodyParser: false, // vigtigt for filupload
-  },
-};
+// Lav en OpenAI client med din API key i Vercel Environment Variables
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-export default async function handler(req, res) {
-  if (req.method === "POST") {
-    const form = formidable({ keepExtensions: true });
-    form.parse(req, async (err, fields, files) => {
-      if (err) return res.status(500).json({ error: err.message });
-
-      const filePath = files.contract.filepath; // hent filen
-      const fileContent = fs.readFileSync(filePath, "utf-8");
-
-      const aiResponse = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [{ role: "user", content: fileContent }],
-      });
-
-      res.status(200).json({ result: aiResponse.choices[0].message.content });
-    });
-  } else {
-    res.status(405).json({ error: "POST only" });
-  }
-}
-// fil: /api/kontrakt.js
-import formidable from "formidable";
-import fs from "fs";
-
-// Vercel API handler
-export const config = {
-  api: {
-    bodyParser: false, // vi bruger formidable, ikke default parser
-  },
-};
-
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Kun POST tilladt' });
   }
 
   const form = new formidable.IncomingForm();
+  form.keepExtensions = true; // beholder filtypen
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      console.error("Formidable error:", err);
-      return res.status(500).json({ error: "Error parsing file" });
+      console.error(err);
+      return res.status(500).json({ error: 'Fejl ved parsing af filen' });
     }
 
     try {
-      // Her får du filen fra brugeren
       const file = files.file;
-      if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
+      if (!file) return res.status(400).json({ error: 'Ingen fil sendt' });
 
-      // Læs indholdet af filen (hvis det er tekst eller PDF du kan parse)
-      const data = fs.readFileSync(file.filepath, "utf8");
+      // Læs filen som tekst (kun txt for simplicity her)
+      const content = fs.readFileSync(file.filepath, 'utf-8');
 
-      // TODO: Kald din AI eller kontrakt-analyse her
-      // f.eks: const result = await analyzeContract(data);
+      // Send teksten til OpenAI
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          { role: 'system', content: 'Du er en kontrakt-assistent.' },
+          { role: 'user', content: `Analysér og lav et resumé af denne kontrakt:\n\n${content}` }
+        ]
+      });
 
-      const result = {
-        message: "Fil modtaget og klar til analyse",
-        fileName: file.originalFilename,
-        // analyseResult: result
-      };
+      const summary = completion.choices[0].message.content;
 
-      return res.status(200).json(result);
-    } catch (error) {
-      console.error("Handler error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      res.status(200).json({
+        message: 'Kontrakt analyseret!',
+        summary
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'Fejl ved AI analyse' });
     }
   });
-}
+};
