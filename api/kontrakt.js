@@ -9,8 +9,13 @@ export const config = {
   },
 };
 
+// Tjek at OpenAI key er sat
+if (!process.env.OPENAI_API_KEY) {
+  console.warn("⚠️ OPENAI_API_KEY is not set!");
+}
+
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Husk at gem OPENAI_API_KEY i Vercel
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export default async function handler(req, res) {
@@ -21,11 +26,16 @@ export default async function handler(req, res) {
   const form = formidable({ multiples: false });
 
   form.parse(req, async (err, fields, files) => {
-    if (err) return res.status(500).json({ error: "Failed to parse file" });
+    if (err) {
+      console.error("Formidable parse error:", err);
+      return res.status(500).json({ error: "Failed to parse file", details: err.message });
+    }
 
     try {
       const file = files.file;
-      if (!file) return res.status(400).json({ error: "No file uploaded" });
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
       const fileContent = fs.readFileSync(file.filepath, "utf8");
 
@@ -51,7 +61,7 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error("AI Processing error:", error);
-      res.status(500).json({ error: "Failed to process file with AI" });
+      res.status(500).json({ error: "Failed to process file with AI", details: error.message });
     }
   });
 }
