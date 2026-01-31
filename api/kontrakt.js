@@ -1,49 +1,57 @@
 import formidable from "formidable";
 import fs from "fs";
+import OpenAI from "openai";
 
-// For at Vercel ikke parser body automatisk
+// Vercel config – vi håndterer filen selv
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Husk at gem OPENAI_API_KEY i Vercel
+});
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Opret formidable form
   const form = formidable({ multiples: false });
 
   form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error("Formidable error:", err);
-      return res.status(500).json({ error: "Failed to parse file" });
-    }
+    if (err) return res.status(500).json({ error: "Failed to parse file" });
 
     try {
-      // files.file afhænger af key i Postman
       const file = files.file;
-      if (!file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
+      if (!file) return res.status(400).json({ error: "No file uploaded" });
 
-      // Læs filens indhold som tekst
       const fileContent = fs.readFileSync(file.filepath, "utf8");
 
-      // Her kan du sende fileContent til AI til analyse
-      // Eksempel: dummy response indtil AI er sat op
-      const analysisResult = {
-        message: "File received and parsed",
-        contentLength: fileContent.length,
-        first100Chars: fileContent.slice(0, 100),
-      };
+      // Send til OpenAI for analyse
+      const response = await client.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Du er en kontraktexpert. Analysér kontrakten og giv: 1) Resume, 2) Sikkerhedsvurdering, 3) Overblik over løn og vigtige vilkår.",
+          },
+          { role: "user", content: fileContent },
+        ],
+        temperature: 0.2,
+      });
 
-      res.status(200).json(analysisResult);
+      const analysis = response.choices[0].message.content;
+
+      res.status(200).json({
+        message: "Kontrakten er analyseret",
+        analysis,
+      });
     } catch (error) {
-      console.error("Processing error:", error);
-      res.status(500).json({ error: "Failed to process file" });
+      console.error("AI Processing error:", error);
+      res.status(500).json({ error: "Failed to process file with AI" });
     }
   });
 }
